@@ -4,3 +4,4 @@ pandas==2.2.3
 SQLAlchemy==2.0.36
 ollama==0.3.3
 pytest==8.3.4
+pytest-mock==3.12.0

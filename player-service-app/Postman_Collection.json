@@ -1,0 +1,494 @@
+{
+  "info": {
+    "name": "Intuit Player Service Demo",
+    "description": "API collection for Intuit interview demo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. Health & Setup",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cache Health",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/admin/cache/health",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "cache", "health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('admin_token', response.data.token);",
+                  "    pm.collectionVariables.set('auth_token', response.data.token);",
+                  "    console.log('Admin token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@intuit.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Regular User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user_token', response.data.token);",
+                  "    console.log('User token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@intuit.com\",\n  \"password\": \"user123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Invalid Credentials",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@intuit.com\",\n  \"password\": \"wrong_password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "me"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Players - Protected Endpoints",
+      "item": [
+        {
+          "name": "Get All Players (No Auth - Should Fail)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/players",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "players"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Players (With Auth)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/players?limit=10&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "players"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Player by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/players/{{player_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "players", "{{player_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Player by ID - Twice (Test Caching)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Run this twice to see caching in action",
+                  "console.log('Response time:', pm.response.responseTime, 'ms');",
+                  "console.log('Second request should be faster due to caching');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/players/{{player_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "players", "{{player_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SQL Injection Attempt (Should Fail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/players/123' OR '1'='1",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "players", "123' OR '1'='1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Admin Endpoints (RBAC Demo)",
+      "item": [
+        {
+          "name": "Admin Stats - With User Token (Should Fail 403)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/admin/stats",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Stats - With Admin Token (Should Succeed)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/admin/stats",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cache Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/admin/cache/stats",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "cache", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalidate Cache",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pattern\": \"player_service:*\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/admin/cache/invalidate",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "cache", "invalidate"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Service-to-Service (API Key)",
+      "item": [
+        {
+          "name": "Internal Get Player - No API Key (Should Fail)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/internal/players/{{player_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "internal", "players", "{{player_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Internal Get Player - With API Key",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "ml-service-key-123",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/internal/players/{{player_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "internal", "players", "{{player_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. LLM Endpoints (Optional)",
+      "item": [
+        {
+          "name": "List Models",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/chat/list-models",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "chat", "list-models"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat with LLM",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Tell me about baseball players\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "chat"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "player_id",
+      "value": "player123",
+      "type": "string"
+    }
+  ]
+}
+
