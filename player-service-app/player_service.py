@@ -1,9 +1,11 @@
 import sqlite3
-from sqlalchemy import create_engine
+
+from app_paths import PLAYER_DB
+
 
 class PlayerService:
     def __init__(self):
-        conn = sqlite3.connect("player.db")
+        conn = sqlite3.connect(PLAYER_DB)
         self.conn = conn
         self.cursor = conn.cursor()
         self.columns = self.get_columns()
@@ -35,11 +37,9 @@ class PlayerService:
 
         return result
 
-
     def convert_row_to_dict(self, row):
-        dic = { self.columns[i]: row[i] for i in range(len(row)) }
+        dic = {self.columns[i]: row[i] for i in range(len(row))}
         return dic
-
 
     def get_columns(self):
         self.cursor.execute("PRAGMA table_info(players)")

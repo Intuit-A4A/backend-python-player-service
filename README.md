@@ -32,8 +32,23 @@ Player Service is a backend application that serves baseball player data. In add
 ```
 
 1. Install application dependencies
-    - Move into the project's root directory, run: `cd player-service-app`.
-    - From the project's root directory, run: `pip install -r requirements.txt`
+    - Move into the application directory: `cd player-service-app`.
+    - Create and activate a virtual environment (recommended on macOS/Linux with system Python):
+
+    ```shell
+    python3 -m venv .venv
+    source .venv/bin/activate  # Windows: .venv\Scripts\activate
+    pip install -r requirements.txt
+    ```
+
+### Part 1b: Run tests
+
+Tests do not require Docker or Ollama. From the repository root or from `player-service-app`:
+
+```shell
+cd player-service-app
+pytest
+```
 
 ### Part 2: Run Player Service (without LLM)
 
@@ -67,13 +82,20 @@ Player service integrates with Ollama 🦙, which allows us to run LLMs locally.
     docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
     ```
 
-3. Download and run `tinyllama` model
+3. Download the `tinyllama` model (wait until the Ollama container is running)
 
     ```shell
-    docker exec -it ollama ollama run tinyllama
+    until docker exec ollama ollama list >/dev/null 2>&1; do sleep 2; done
+    docker exec ollama ollama pull tinyllama
     ```
 
-4. Test Ollama API server
+4. Confirm the model is available
+
+    ```shell
+    curl -s http://localhost:11434/api/tags | grep -i tinyllama
+    ```
+
+5. Test Ollama API server
 
     ```curl
     curl -v --location 'http://localhost:11434/api/generate' --header 'Content-Type: application/json' --data '{"model": "tinyllama","prompt": "why is the sky blue?", "stream": false}'
